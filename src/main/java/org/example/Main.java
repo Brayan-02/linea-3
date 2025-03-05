@@ -6,17 +6,20 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) {
+
+        final String RESET = "\u001B[0m";
+        final String ROJO = "\u001B[31m";
+        final String AZUL = "\u001B[34m";
+        final String CYAN = "\u001B[36m";
+        final String VERDE = "\u001B[32m";
+
         Scanner sc = new Scanner(System.in);
         Random ram = new Random();
         RuletaRusa ruleta = new RuletaRusa();
 
-        int numeroJugador;
-        int jugadorActual;
-        int jugadorInicial;
-
-        System.out.println("RULETA RUSA");
-        System.out.println("¿Cuántos jugadores jugarán?");
-        numeroJugador = sc.nextInt();
+        System.out.println(CYAN + "\t🎰RULETA RUSA🎰" + RESET);
+        System.out.println(AZUL + "¿Cuántos jugadores jugarán?" + RESET);
+        int numeroJugador = sc.nextInt();
 
         boolean[] jugadoresVivos = new boolean[numeroJugador + 1];
         for (int i = 1; i <= numeroJugador; i++) {
@@ -27,65 +30,60 @@ public class Main {
 
         while (seguirJugando) {
 
+            int jugadorActual;
             do {
-                jugadorInicial = ram.nextInt(numeroJugador) + 1;
-            } while (!jugadoresVivos[jugadorInicial]);
-
-            jugadorActual = jugadorInicial;
+                jugadorActual = ram.nextInt(numeroJugador) + 1;
+            } while (!jugadoresVivos[jugadorActual]);
+            ruleta.reiniciarJuego();
 
             boolean alguienMuerto = false;
-            int disparosRealizados = 0;
 
-            do {
-                System.out.println("Turno del jugador: " + jugadorActual);
-                disparosRealizados++;
-                System.out.println(ruleta.toString());
+            while (!alguienMuerto) {
+                System.out.println(VERDE+ "Turno del jugador: " + jugadorActual + RESET);
+                System.out.println("Di si 😥 para disparar 🎆");
 
-                boolean disparo = ruleta.disparar();
-
-                if (disparosRealizados == 6) {
-                    System.out.println("Jugador " + jugadorActual + " ha muerto (la bala estaba en el último disparo).");
-                    jugadoresVivos[jugadorActual] = false;
-                    alguienMuerto = true;
-                    ruleta.reiniciarJuego();
-                } else if (disparo) {
-                    System.out.println("Jugador " + jugadorActual + " ha muerto.");
-                    jugadoresVivos[jugadorActual] = false;
-                    alguienMuerto = true;
-                    ruleta.reiniciarJuego();
-                } else {
-                    System.out.println("Jugador " + jugadorActual + " se ha salvado.");
-
-                    do {
-                        jugadorActual++;
-                        if (jugadorActual > numeroJugador) {
-                            jugadorActual = 1;
-                        }
-                    } while (!jugadoresVivos[jugadorActual]);
-                }
-
-                if (alguienMuerto) {
-                    int vivos = 0;
-                    for (int i = 1; i <= numeroJugador; i++) {
-                        if (jugadoresVivos[i]) {
-                            vivos++;
-                        }
-                    }
-
-                    if (vivos <= 1) {
-                        System.out.println("Solo queda un jugador vivo. Fin del juego.");
-                        seguirJugando = false;
+                String respuesta1 = sc.next();
+                if (respuesta1.equalsIgnoreCase("si")) {
+                    if (ruleta.disparar()) {
+                        System.out.println(AZUL+ "Jugador " + jugadorActual + " ha muerto.☠️" +RESET);
+                        System.out.println(ruleta.toString());
+                        jugadoresVivos[jugadorActual] = false;
+                        alguienMuerto = true;
+                        System.out.println(ROJO+"-------------------------------"+RESET);
                     } else {
-                        System.out.println("¿Desean seguir jugando? (si/no)");
-                        String respuesta = sc.next();
-                        if (!respuesta.equalsIgnoreCase("si")) {
-                            seguirJugando = false;
-                            ruleta.reiniciarJuego();
-                        }
+                        System.out.println(AZUL+ "Jugador " + jugadorActual + " se ha salvado.🎉"+RESET);
+                        System.out.println(ROJO+"-------------------------------"+RESET);
                     }
-                }
 
-            } while (!alguienMuerto && disparosRealizados < 6);
+                    if (!alguienMuerto) {
+                        do {
+                            jugadorActual++;
+                            if (jugadorActual > numeroJugador) {
+                                jugadorActual = 1;
+                            }
+                        } while (!jugadoresVivos[jugadorActual]);
+                    }
+                } else {
+                    System.out.println(ROJO + "Gallina🐔 igual tendrás que disparar🔫 " + RESET);
+                }
+            }
+            int vivos = 0;
+            for (int i = 1; i <= numeroJugador; i++) {
+                if (jugadoresVivos[i]) {
+                    vivos++;
+                }
+            }
+
+            if (vivos <= 1) {
+                System.out.println("Solo queda un jugador vivo. Fin del juego.");
+                seguirJugando = false;
+            } else {
+                System.out.println("¿Desean seguir jugando? (si/no)");
+                String respuesta = sc.next();
+                if (!respuesta.equalsIgnoreCase("si")) {
+                    seguirJugando = false;
+                }
+            }
 
             System.out.println("Fin de la ronda.");
         }
