@@ -1,12 +1,12 @@
 package org.example;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
-
         final String RESET = "\u001B[0m";
         final String ROJO = "\u001B[31m";
         final String AZUL = "\u001B[34m";
@@ -14,80 +14,130 @@ public class Main {
         final String VERDE = "\u001B[32m";
 
         Scanner sc = new Scanner(System.in);
-        Random ram = new Random();
-        RuletaRusa ruleta = new RuletaRusa();
 
-        System.out.println(CYAN + "\t🎰RULETA RUSA🎰" + RESET);
-        System.out.println(AZUL + "¿Cuántos jugadores jugarán?" + RESET);
-        int numeroJugador = sc.nextInt();
+        CuentaBancaria cuenta1 = new CuentaBancaria("Brayan2002", "Brayan Forigua", 2000);
+        CuentaBancaria cuenta2 = new CuentaBancaria("valencia69", "Daniel Valencia", 5000);
+        CuentaBancaria cuenta3 = new CuentaBancaria("andres203", "Andres Forero", 3000000.2);
 
-        boolean[] jugadoresVivos = new boolean[numeroJugador + 1];
-        for (int i = 1; i <= numeroJugador; i++) {
-            jugadoresVivos[i] = true;
-        }
+        List<CuentaBancaria> cuentas = new ArrayList<>();
+        cuentas.add(cuenta1);
+        cuentas.add(cuenta2);
+        cuentas.add(cuenta3);
 
-        boolean seguirJugando = true;
+        System.out.println(CYAN + "\t\t CAJERO" + RESET);
 
-        while (seguirJugando) {
+        int opcion1 = 0;
 
-            int jugadorActual;
-            do {
-                jugadorActual = ram.nextInt(numeroJugador) + 1;
-            } while (!jugadoresVivos[jugadorActual]);
-            ruleta.reiniciarJuego();
+        while (opcion1 != 4) {
+            System.out.println("Si no tienes cuenta creala o accede📱 ");
+            System.out.println(AZUL + "1️⃣ Accede a tu Cuenta \n2️⃣ Ver Cuentas \n3️⃣ Crear Cuentas \n4️⃣ Salir" + RESET);
+            opcion1 = sc.nextInt();
 
-            boolean alguienMuerto = false;
+            switch (opcion1) {
+                case 1 -> {
+                    CuentaBancaria cuentaSeleccionada = null;
+                    do {
 
-            while (!alguienMuerto) {
-                System.out.println(VERDE+ "Turno del jugador: " + jugadorActual + RESET);
-                System.out.println("Di si 😥 para disparar 🎆");
+                        System.out.println(VERDE + "Cuentas disponibles:" + RESET);
+                        for (CuentaBancaria cuenta : cuentas) {
+                            System.out.println("✔️ " + AZUL + cuenta.getNumeroCuenta() + RESET);
+                        }
 
-                String respuesta1 = sc.next();
-                if (respuesta1.equalsIgnoreCase("si")) {
-                    if (ruleta.disparar()) {
-                        System.out.println(AZUL+ "Jugador " + jugadorActual + " ha muerto.☠️" +RESET);
-                        System.out.println(ruleta.toString());
-                        jugadoresVivos[jugadorActual] = false;
-                        alguienMuerto = true;
-                        System.out.println(ROJO+"-------------------------------"+RESET);
-                    } else {
-                        System.out.println(AZUL+ "Jugador " + jugadorActual + " se ha salvado.🎉"+RESET);
-                        System.out.println(ROJO+"-------------------------------"+RESET);
-                    }
+                        System.out.println("Ingresa el Serial de la cuenta con la que deseas operar:");
+                        String numeroCuentaSeleccionada = sc.next();
 
-                    if (!alguienMuerto) {
-                        do {
-                            jugadorActual++;
-                            if (jugadorActual > numeroJugador) {
-                                jugadorActual = 1;
+                        for (CuentaBancaria cuenta : cuentas) {
+                            if (cuenta.getNumeroCuenta().equals(numeroCuentaSeleccionada)) {
+                                cuentaSeleccionada = cuenta;
+                                break;
                             }
-                        } while (!jugadoresVivos[jugadorActual]);
+                        }
+
+                        if (cuentaSeleccionada == null) {
+                            System.out.println(ROJO + "❌ Cuenta no encontrada. ❌" + RESET);
+                            continue;
+                        }
+                    }while (cuentaSeleccionada == null);
+                    System.out.println("Has seleccionado la cuenta de: " + VERDE + cuentaSeleccionada.getTitular() + RESET);
+
+                    int opcion = 0;
+                    while (opcion != 4) {
+                        System.out.println(VERDE + "¿Qué deseas hacer?" + RESET);
+                        System.out.println(AZUL + "1️⃣Ingresar dinero\n2️⃣Retirar dinero\n3️⃣Mostrar información de la cuenta\n4️⃣Volver al menú principal" + RESET);
+                        opcion = sc.nextInt();
+
+                        switch (opcion) {
+                            case 1 -> {
+                                System.out.println(CYAN+ "¿Cuánto deseas ingresar?" + RESET);
+                                double saldo = sc.nextDouble();
+                                if(saldo <0){
+                                    System.out.println(ROJO+ "❌valor no aceptado debe ser saldo positivo❌"+ RESET);
+                                    opcion = 1;
+                                }else{
+                                    System.out.println(VERDE+ "✅Recarga exitosa ✅"+RESET);
+                                    cuentaSeleccionada.ingresarSaldo(saldo);
+                                    System.out.println(VERDE+ "Saldo actual: $" + cuentaSeleccionada.getSaldo());
+                                    System.out.println(VERDE+ "---------------------------------"+RESET);
+                                }
+
+                            }
+                            case 2 -> {
+                                System.out.println("¿Cuánto deseas retirar?");
+                                double saldo = sc.nextDouble();
+                                if (cuentaSeleccionada.retirarSaldo(saldo)) {
+                                    System.out.println(VERDE +"Retiro exitoso. Saldo actual: $" + cuentaSeleccionada.getSaldo()+RESET);
+                                    System.out.println(VERDE+ "---------------------------------"+RESET);
+                                } else {
+                                    System.out.println(ROJO + "❌Fondos insuficientes.❌" + RESET);
+                                    System.out.println(VERDE+ "---------------------------------"+RESET);
+                                }
+                            }
+                            case 3 -> {
+                                System.out.println("Información de la cuenta:");
+                                System.out.println(CYAN + "--------------------------------------------------");
+                                System.out.printf("| %-15s | %-15s | %-10s |\n", "Serial", "Titular", " Saldo");
+                                System.out.println(CYAN + "--------------------------------------------------");
+                                System.out.printf("| %-15s | %-15s | %-10s |\n",cuentaSeleccionada.getNumeroCuenta()
+                                        ,cuentaSeleccionada.getTitular(),cuentaSeleccionada.getSaldo());
+                                System.out.println(CYAN + "--------------------------------------------------");
+
+                            }
+                            case 4 -> System.out.println("Volviendo al menú principal...");
+                            default -> System.out.println(ROJO + "Opción no válida." + RESET);
+                        }
                     }
-                } else {
-                    System.out.println(ROJO + "Gallina🐔 igual tendrás que disparar🔫 " + RESET);
                 }
-            }
-            int vivos = 0;
-            for (int i = 1; i <= numeroJugador; i++) {
-                if (jugadoresVivos[i]) {
-                    vivos++;
-                }
-            }
+                case 2 -> {
+                    System.out.println(VERDE + "Lista de Cuentas:" + RESET);
+                    System.out.println(CYAN + "--------------------------------------------------");
+                    System.out.printf("| %-15s | %-15s | %-10s |\n", "Serial", "Titular", " Saldo");
+                    System.out.println(CYAN + "--------------------------------------------------");
 
-            if (vivos <= 1) {
-                System.out.println("Solo queda un jugador vivo. Fin del juego.");
-                seguirJugando = false;
-            } else {
-                System.out.println("¿Desean seguir jugando? (si/no)");
-                String respuesta = sc.next();
-                if (!respuesta.equalsIgnoreCase("si")) {
-                    seguirJugando = false;
-                }
-            }
+                    for (CuentaBancaria cuenta : cuentas) {
+                        System.out.printf("| %-15s | %-15s |$ %-10.1f |\n",
+                                cuenta.getNumeroCuenta(),
+                                cuenta.getTitular(),
+                                cuenta.getSaldo());
+                    }
 
-            System.out.println("Fin de la ronda.");
+                    System.out.println(CYAN + "--------------------------------------------------" + RESET);
+                }
+
+                case 3 -> {
+                    sc.nextLine();
+                    System.out.println(VERDE + "Creación de nueva cuenta." + RESET);
+                    System.out.println("Ingresa el Serial de cuenta:");
+                    String numCuenta = sc.nextLine();
+                    System.out.println("Ingresa el nombre del titular:");
+                    String titular = sc.nextLine();
+                    System.out.println("Ingresa el saldo inicial:");
+                    double saldoInicial = sc.nextDouble();
+                    cuentas.add(new CuentaBancaria(numCuenta, titular, saldoInicial));
+                    System.out.println(VERDE + "Cuenta creada exitosamente." + RESET);
+                }
+                case 4 -> System.out.println("Saliendo del sistema...");
+                default -> System.out.println(ROJO + "Opción no válida." + RESET);
+            }
         }
-
-        System.out.println("Juego terminado.");
     }
 }
